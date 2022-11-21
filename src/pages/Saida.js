@@ -1,15 +1,61 @@
 import styled from "styled-components"
 
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useState, useContext } from "react"
+import UserContext from '../Context/Context'
+
 export default function Saida() {
+
+    const { userData, setUserData } = useContext(UserContext);
+
+    const [form, setForm] = useState({
+      value: "",
+      description: "",
+    });
+  
+    const navigate = useNavigate();
+  
+    function postSaida(e) {
+      e.preventDefault();
+  
+      axios
+        .post(
+          "http://localhost:5000/transactions",
+          { ...form, value: parseFloat(form.value), date: Date.now() },
+          {
+            headers: {
+              Authorization: `Bearer ${userData.token}`,
+            },
+          }
+        )
+        .then(() => {
+          axios
+            .get("http://localhost:5000/transactions", {
+              headers: {
+                Authorization: `Bearer ${userData.token}`,
+              },
+            })
+            .then((res) => {
+              setUserData({
+                ...userData,
+                transactions: res.data.transactions,
+              });
+              navigate("/registro");
+            });
+        });
+    }
+
+    
     return (
         <Container>
             <Menu>
                 <h1>Nova saída</h1>
             </Menu>
             <BoxRegistro>
-                <input placeholder="Valor" />
-                <input placeholder="Descrição" />
-                <button>Salvar saída</button>
+                <input placeholder="Valor" value={form.value} onChange={e => setForm({ ...form, value: e.target.value })}/>
+                <input placeholder="Descrição" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}/>
+                <button onClick={postSaida}>Salvar saída</button>
             </BoxRegistro>
         </Container>
     )

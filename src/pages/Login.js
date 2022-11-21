@@ -1,15 +1,70 @@
 import styled from "styled-components"
+import { useContext, useState, useEffect } from "react"
+import { useNavigate, Link } from 'react-router-dom';
+import axios from "axios";
+
+import UserContext from '../Context/Context'
+
 
 export default function Login() {
+
+    const { userData, setUserData } = useContext(UserContext);
+    const navigate = useNavigate()
+
+
+    const [email, setEmail] = useState("")
+    const [senha, setSenha] = useState("")
+
+    useEffect(() => {
+        
+
+        if (userData !== null) {
+            navigate("/registro")
+        }
+
+    }, [userData])
+
+
+
+    function fazerLogin(e) {
+        e.preventDefault();
+
+        const body = {
+            email: email,
+            password: senha,
+        }
+
+        axios.post("http://localhost:5000/login", body)
+            .then((res) => {
+                const { token, email, name, transactions } = res.data;
+
+                setUserData({
+                    ...userData,
+                    token: token,
+                    email: email,
+                    name: name,
+                    transactions: transactions,
+                });
+
+                navigate("/registro");
+
+            })
+            .catch((err) => {
+                console.log(err)
+            });
+    }
+
     return (
         <Container>
             <h1>MyWallet</h1>
             <LoginBox>
-                <input placeholder="E-mail" />
-                <input placeholder="Senha" />
-                <button>Entrar</button>
+                <input type="email" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} />
+                <input type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} />
+                <button onClick={fazerLogin}>Entrar</button>
             </LoginBox>
-            <h2>Primeira vez? Cadastre-se!</h2>
+            <Link to={'cadastro'}>
+                <h2>Primeira vez? Cadastre-se!</h2>
+            </Link>
         </Container>
     )
 }

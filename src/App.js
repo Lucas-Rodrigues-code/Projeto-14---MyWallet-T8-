@@ -1,5 +1,6 @@
 import { createGlobalStyle } from "styled-components"
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import UserContext from './Context/Context'
 
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
@@ -7,20 +8,39 @@ import Registro from "./pages/Registro";
 import Saida from "./pages/Saida";
 import Entrada from "./pages/Entrada";
 
+import { useState } from "react";
+
 
 export default function App() {
+
+    const listaLogin = localStorage.getItem("login");
+    const localToken= JSON.parse(listaLogin)
+    
+    const [userData, setUserData] = useState(localToken);
+
+    localStorage.setItem("login", JSON.stringify(userData))
+
+    
+    
+   
+
+    
+    
+
     return (
         <>
-            <GlobalStyle />
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<Login />} />
-                    <Route path="/cadastro" element={<Cadastro />} />
-                    <Route path="/registro" element={<Registro />} />
-                    <Route path="/saida" element={<Saida />} />
-                    <Route path="/entrada" element={<Entrada />} />
-                </Routes>
-            </BrowserRouter>
+            <UserContext.Provider value={{ userData, setUserData}}>
+                <GlobalStyle />
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/" element={<Login />} />
+                        <Route path="/cadastro" element={<Cadastro />} />
+                        <Route path="/registro" element={<Registro />} />
+                        <Route path="/saida" element={<Saida />} />
+                        <Route path="/entrada" element={<Entrada />} />
+                    </Routes>
+                </BrowserRouter>
+            </UserContext.Provider>
         </>
     )
 }

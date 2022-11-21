@@ -1,15 +1,61 @@
+import { useState, useContext } from "react"
 import styled from "styled-components"
 
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import UserContext from '../Context/Context'
 export default function Entrada(){
+
+    const { userData, setUserData } = useContext(UserContext);
+
+  const [form, setForm] = useState({
+    value: "",
+    description: "",
+  });
+
+  const navigate = useNavigate();
+
+  function postEntrada(e) {
+    e.preventDefault();
+
+    axios
+      .post(
+        "http://localhost:5000/transactions",
+        { ...form, value: parseFloat(form.value), date: Date.now() },
+        {
+          headers: {
+            Authorization: `Bearer ${userData.token}`,
+          },
+        }
+      )
+      .then(() => {
+        axios
+          .get("http://localhost:5000/transactions", {
+            headers: {
+              Authorization: `Bearer ${userData.token}`,
+            },
+          })
+          .then((res) => {
+            setUserData({
+              ...userData,
+              transactions: res.data.transactions,
+            });
+            navigate("/registro");
+          });
+      });
+  }
+
+      
+
     return(
         <Container>
         <Menu>
             <h1>Nova entrada</h1>
         </Menu>
         <BoxRegistro>
-            <input placeholder="Valor"/>
-            <input placeholder="Descrição"/>
-            <button>Salvar entrada</button> 
+            <input placeholder="Valor" value={form.value} onChange={e => setForm({ ...form, value: e.target.value })}/>
+            <input placeholder="Descrição" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}/>
+            <button onClick={postEntrada}>Salvar entrada</button>  
         </BoxRegistro>
     </Container>
     )

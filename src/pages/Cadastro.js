@@ -1,17 +1,61 @@
 import styled from "styled-components"
 
+import axios from "axios"
+import { useState } from "react"
+import { useNavigate, Link } from 'react-router-dom';
+
+
 export default function Cadastro() {
+
+
+    const [form, setForm] = useState({
+        nome: "",
+        email: "",
+        senha: "",
+        confirmeSenha: "",
+    });
+
+    const navigate = useNavigate();
+
+    async function fazerCadastro(e) {
+        e.preventDefault();
+
+        if (form.senha !== form.confirmeSenha) {
+            alert("Senhas diferentes !!");
+            return;
+        }
+
+        const body = {
+            name: form.nome,
+            email: form.email,
+            password: form.senha
+        }
+
+         axios.post("http://localhost:5000/register", body)
+         .then(()=>{
+            navigate("/");
+         })
+         .catch((err)=>{
+            console.log(err)
+         })
+
+        
+    }
+
+
     return (
         <Container>
             <h1>MyWallet</h1>
             <LoginBox>
-                <input placeholder="Nome" />
-                <input placeholder="E-mail" />
-                <input placeholder="Senha" />
-                <input placeholder="Confirme a senha" />
-                <button>Cadastrar</button>
+                <input placeholder="Nome" value={form.nome} onChange={e => setForm({ ...form, nome: e.target.value })} />
+                <input type="email" placeholder="E-mail" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                <input type="password" placeholder="Senha" value={form.senha} onChange={e => setForm({ ...form, senha: e.target.value })} />
+                <input type="password" placeholder="Confirme a senha" value={form.confirmeSenha} onChange={e => setForm({ ...form, confirmeSenha: e.target.value })} />
+                <button onClick={fazerCadastro}>Cadastrar</button>
             </LoginBox>
-            <h2>Já tem uma conta? Entre agora!</h2>
+            <Link to={'/'}>
+                <h2>Já tem uma conta? Entre agora!</h2>
+            </Link>
         </Container>
     )
 }
